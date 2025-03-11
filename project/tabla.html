@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Empleados</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="sweetalert.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  
+    <style>
+        /* Estilos existentes */
+        .card {
+            text-align: center;
+            position: relative;
+        }
+    
+        .icon {
+            display: block;
+            margin: 0 auto 10px;
+        }
+    
+        h1 {
+            margin-top: 0;
+        }
+
+        /* Nuevos estilos para la tabla */
+        .data-section {
+            margin: 2rem auto;
+            max-width: 1200px;
+            padding: 0 20px;
+        }
+
+        .data-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-top: 2rem;
+        }
+
+        .search-container {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .search-input {
+            padding: 0.8rem 1.2rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            border-color: #6200ee;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(98, 0, 238, 0.1);
+        }
+
+        .search-icon {
+            display: flex;
+            align-items: center;
+            color: #6200ee;
+            font-size: 1.2rem;
+        }
+
+        .employees-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .employees-table th,
+        .employees-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .employees-table th {
+            background-color: #f8f8f8;
+            color: #6200ee;
+            font-weight: 600;
+        }
+
+        .employees-table tr:hover {
+            background-color: #fafafa;
+        }
+
+        @media (max-width: 768px) {
+            .employees-table {
+                display: block;
+                overflow-x: auto;
+            }
+        }
+
+        .contract-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    background: #e6e1ff;
+    color: #6200ee;
+}
+
+.action-btn {
+    border: none;
+    background: none;
+    padding: 8px;
+    margin: 0 4px;
+    cursor: pointer;
+    color: #666;
+    transition: all 0.3s ease;
+}
+
+.action-btn:hover {
+    color: #6200ee;
+    transform: scale(1.1);
+}
+
+.edit-btn:hover {
+    color: #007bff;
+}
+
+.delete-btn:hover {
+    color: #dc3545;
+}
+
+    </style>
+</head>
+<body>
+    <!-- 
+    <div class="container">
+        <form id="formulario" class="form-card">
+         ... (contenido existente del formulario) ... 
+        </form>
+    </div> -->
+
+    <!-- Nueva sección de datos -->
+    <div class="data-section">
+        <div class="data-card">
+            <div class="search-container">
+                <input type="text" class="search-input" placeholder="Buscar empleados..." id="searchInput">
+                <div class="search-icon">
+                    <i class="fas fa-search"></i>
+                </div>
+            </div>
+            
+            <table class="employees-table">
+                <thead>
+                    <tr>
+                        <th>Documento</th>
+                        <th>Nombre</th>
+                        <th>Teléfono</th>
+                        <th>Correo</th>
+                        <th>Ciudad</th>
+                        <th>Contrato</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- Datos dinámicos desde JS -->
+                    <tr>
+                        <td>123456789</td>
+                        <td>Juan Pérez</td>
+                        <td>300 123 4567</td>
+                        <td>juan@empresa.com</td>
+                        <td>Bogotá</td>
+                        <td><span class="contract-badge">Permanente</span></td>
+                        <td>
+                            <button class="action-btn edit-btn">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="action-btn delete-btn">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Función de búsqueda
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const rows = document.querySelectorAll('.employees-table tbody tr');
+            
+            rows.forEach(row => {
+                const textContent = row.textContent.toLowerCase();
+                row.style.display = textContent.includes(searchTerm) ? '' : 'none';
+            });
+        });
+
+        // Cargar empleados al iniciar
+async function loadEmployees() {
+    try {
+        const response = await fetch(API_URL);
+        const employees = await response.json();
+        
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = employees.map(employee => `
+            <tr>
+                <td>${employee.documento}</td>
+                <td>${employee.nombres} ${employee.apellidos}</td>
+                <td>${employee.telefono}</td>
+                <td>${employee.correo}</td>
+                <td>${employee.ciudad}</td>
+                <td><span class="contract-badge">${employee.contrato}</span></td>
+                <td>
+                    <button class="action-btn edit-btn">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="action-btn delete-btn">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+    } catch (error) {
+        console.error('Error cargando empleados:', error);
+    }
+}
+
+// Llamar al cargar la página
+window.addEventListener('load', loadEmployees);
+
+    </script>
+
+    <!-- Scripts existentes -->
+    <script src="main.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
